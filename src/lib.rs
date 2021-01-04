@@ -114,7 +114,7 @@ impl Mpr121 {
         // 0.5uS encoding, 1ms period
         self.dev.smbus_write_byte_data(Mpr121::REG_CONFIG2, 0x20)?;
         // Enable all electrodes.
-        // self.dev.smbus_write_byte_data(Mpr121::REG_ECR, 0x8F)?;
+        self.dev.smbus_write_byte_data(Mpr121::REG_ECR, 0x8F)?;
         // start with first 5 bits of baseline tracking
 
         Ok(())
