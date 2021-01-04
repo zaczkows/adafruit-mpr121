@@ -15,8 +15,9 @@ pub const MPR121_RELEASE_THRESHOLD_DEFAULT: u8 = 6;
 
 // TODO: temporary - remove it!
 #[allow(dead_code)]
+/// How MPR121 works is inspired by
+/// https://github.com/adafruit/Adafruit_CircuitPython_MPR121 and https://github.com/adafruit/Adafruit_MPR121
 impl Mpr121 {
-    // From https://github.com/adafruit/Adafruit_CircuitPython_MPR121/blob/master/adafruit_mpr121.py
     // Register addresses.
     const REG_TOUCHSTATUS_L: u8 = 0x00;
     const REG_TOUCHSTATUS_H: u8 = 0x01;
@@ -113,10 +114,16 @@ impl Mpr121 {
         // 0.5uS encoding, 1ms period
         self.dev.smbus_write_byte_data(Mpr121::REG_CONFIG2, 0x20)?;
         // Enable all electrodes.
-        self.dev.smbus_write_byte_data(Mpr121::REG_ECR, 0x8F)?;
+        // self.dev.smbus_write_byte_data(Mpr121::REG_ECR, 0x8F)?;
         // start with first 5 bits of baseline tracking
 
         Ok(())
+    }
+
+    /// Reads the touch status of MPR121. In order to detect if something was really
+    /// touched, old and new status must be compared.
+    pub fn touch_status(&mut self) -> Result<u16, Mpr121Error> {
+        self.dev.smbus_read_word_data(Mpr121::REG_TOUCHSTATUS_L)
     }
 }
 
