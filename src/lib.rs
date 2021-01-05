@@ -9,6 +9,15 @@ pub struct Mpr121 {
 
 pub type Mpr121Error = LinuxI2CError;
 
+pub struct Mpr121TouchStatus {
+    status: u16,
+}
+
+pub struct Mpr121TouchStatusIterator<'a> {
+    status: &'a Mpr121TouchStatus,
+    count: u8,
+}
+
 pub const MPR121_I2CADDR_DEFAULT: u16 = 0x5A;
 pub const MPR121_TOUCH_THRESHOLD_DEFAULT: u8 = 12;
 pub const MPR121_RELEASE_THRESHOLD_DEFAULT: u8 = 6;
@@ -122,15 +131,105 @@ impl Mpr121 {
 
     /// Reads the touch status of MPR121. In order to detect if something was really
     /// touched, old and new status must be compared.
-    pub fn touch_status(&mut self) -> Result<u16, Mpr121Error> {
-        self.dev.smbus_read_word_data(Mpr121::REG_TOUCHSTATUS_L)
+    pub fn touch_status(&mut self) -> Result<Mpr121TouchStatus, Mpr121Error> {
+        let status = self.dev.smbus_read_word_data(Mpr121::REG_TOUCHSTATUS_L)?;
+        Ok(Mpr121TouchStatus::new(status))
+    }
+}
+
+impl Mpr121TouchStatus {
+    /// Creates new touch status
+    fn new(touch_status: u16) -> Self {
+        Self {
+            status: touch_status,
+        }
+    }
+
+    /// Returns if specific pin was touched
+    pub fn touched(&self, item: u8) -> bool {
+        if item <= 11 {
+            return self.status >> item & 0x1 != 0;
+        }
+
+        false
+    }
+
+    /// Number of the first pin
+    pub fn first() -> u8 {
+        0
+    }
+
+    /// Number of the last pin
+    pub fn last() -> u8 {
+        11
+    }
+
+    pub fn iter(&self) -> Mpr121TouchStatusIterator {
+        Mpr121TouchStatusIterator::new(self)
+    }
+}
+
+impl<'a> Mpr121TouchStatusIterator<'a> {
+    fn new(status: &'a Mpr121TouchStatus) -> Self {
+        Self { status, count: 0 }
+    }
+}
+
+impl<'a> Iterator for Mpr121TouchStatusIterator<'a> {
+    type Item = bool;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.count += 1;
+
+        if self.count <= 12 {
+            Some(self.status.touched(self.count - 1))
+        } else {
+            None
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn touch_status() {
+        assert_eq!(Mpr121TouchStatus::first(), 0);
+        assert_eq!(Mpr121TouchStatus::last(), 11);
+        {
+            let ts = Mpr121TouchStatus::new(0b101010101010);
+            let mut tsi = ts.iter();
+            for i in Mpr121TouchStatus::first()..=Mpr121TouchStatus::last() {
+                let v = tsi.next();
+                assert!(v.is_some());
+                let v = v.unwrap();
+                if i % 2 == 0 {
+                    assert!(!ts.touched(i));
+                    assert!(!v);
+                } else {
+                    assert!(ts.touched(i));
+                    assert!(v);
+                }
+            }
+            assert!(tsi.next().is_none());
+        }
+        {
+            let ts = Mpr121TouchStatus::new(0b010101010101);
+            let mut tsi = ts.iter();
+            for i in Mpr121TouchStatus::first()..=Mpr121TouchStatus::last() {
+                let v = tsi.next();
+                assert!(v.is_some());
+                let v = v.unwrap();
+                if i % 2 == 1 {
+                    assert!(!ts.touched(i));
+                    assert!(!v);
+                } else {
+                    assert!(ts.touched(i));
+                    assert!(v);
+                }
+            }
+            assert!(tsi.next().is_none());
+        }
     }
 }
