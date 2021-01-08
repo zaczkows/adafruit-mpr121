@@ -9,6 +9,7 @@ pub struct Mpr121 {
 
 pub type Mpr121Error = LinuxI2CError;
 
+#[derive(Debug)]
 pub struct Mpr121TouchStatus {
     status: u16,
 }
@@ -166,6 +167,28 @@ impl Mpr121TouchStatus {
 
     pub fn iter(&self) -> Mpr121TouchStatusIterator {
         Mpr121TouchStatusIterator::new(self)
+    }
+}
+
+impl std::fmt::Display for Mpr121TouchStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Touch status: [")?;
+        for i in Mpr121TouchStatus::first()..=Mpr121TouchStatus::last() {
+            if i > 0 {
+                write!(f, ", ")?;
+            }
+            write!(
+                f,
+                "{} is {}",
+                i,
+                if (self.status >> i) & 0x1 != 0 {
+                    "on"
+                } else {
+                    "off"
+                }
+            )?;
+        }
+        write!(f, "]")
     }
 }
 
