@@ -155,6 +155,11 @@ impl Mpr121TouchStatus {
         false
     }
 
+    /// Returns if *any* pin was touched
+    pub fn was_touched(&self) -> bool {
+        self.status > 0
+    }
+
     /// Number of the first pin
     pub fn first() -> u8 {
         0
