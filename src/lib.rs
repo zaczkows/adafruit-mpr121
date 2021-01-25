@@ -14,6 +14,7 @@ pub struct Mpr121TouchStatus {
     status: u16,
 }
 
+/// Convenient iterator for pins in `Mpr121TouchStatus`
 pub struct Mpr121TouchStatusIterator<'a> {
     status: &'a Mpr121TouchStatus,
     count: u8,
@@ -23,17 +24,15 @@ pub const MPR121_I2CADDR_DEFAULT: u16 = 0x5A;
 pub const MPR121_TOUCH_THRESHOLD_DEFAULT: u8 = 12;
 pub const MPR121_RELEASE_THRESHOLD_DEFAULT: u8 = 6;
 
-// TODO: temporary - remove it!
-#[allow(dead_code)]
 /// How MPR121 works is inspired by
 /// https://github.com/adafruit/Adafruit_CircuitPython_MPR121 and https://github.com/adafruit/Adafruit_MPR121
 impl Mpr121 {
     // Register addresses.
     const REG_TOUCHSTATUS_L: u8 = 0x00;
-    const REG_TOUCHSTATUS_H: u8 = 0x01;
-    const REG_FILTDATA_0L: u8 = 0x04;
-    const REG_FILTDATA_0H: u8 = 0x05;
-    const REG_BASELINE_0: u8 = 0x1E;
+    // const REG_TOUCHSTATUS_H: u8 = 0x01;
+    // const REG_FILTDATA_0L: u8 = 0x04;
+    // const REG_FILTDATA_0H: u8 = 0x05;
+    // const REG_BASELINE_0: u8 = 0x1E;
     const REG_MHDR: u8 = 0x2B;
     const REG_NHDR: u8 = 0x2C;
     const REG_NCLR: u8 = 0x2D;
@@ -50,19 +49,19 @@ impl Mpr121 {
     const REG_DEBOUNCE: u8 = 0x5B;
     const REG_CONFIG1: u8 = 0x5C;
     const REG_CONFIG2: u8 = 0x5D;
-    const REG_CHARGECURR_0: u8 = 0x5F;
-    const REG_CHARGETIME_1: u8 = 0x6C;
+    // const REG_CHARGECURR_0: u8 = 0x5F;
+    // const REG_CHARGETIME_1: u8 = 0x6C;
     const REG_ECR: u8 = 0x5E;
-    const REG_AUTOCONFIG0: u8 = 0x7B;
-    const REG_AUTOCONFIG1: u8 = 0x7C;
-    const REG_UPLIMIT: u8 = 0x7D;
-    const REG_LOWLIMIT: u8 = 0x7E;
-    const REG_TARGETLIMIT: u8 = 0x7F;
-    const REG_GPIODIR: u8 = 0x76;
-    const REG_GPIOEN: u8 = 0x77;
-    const REG_GPIOSET: u8 = 0x78;
-    const REG_GPIOCLR: u8 = 0x79;
-    const REG_GPIOTOGGLE: u8 = 0x7A;
+    // const REG_AUTOCONFIG0: u8 = 0x7B;
+    // const REG_AUTOCONFIG1: u8 = 0x7C;
+    // const REG_UPLIMIT: u8 = 0x7D;
+    // const REG_LOWLIMIT: u8 = 0x7E;
+    // const REG_TARGETLIMIT: u8 = 0x7F;
+    // const REG_GPIODIR: u8 = 0x76;
+    // const REG_GPIOEN: u8 = 0x77;
+    // const REG_GPIOSET: u8 = 0x78;
+    // const REG_GPIOCLR: u8 = 0x79;
+    // const REG_GPIOTOGGLE: u8 = 0x7A;
     const REG_SOFTRESET: u8 = 0x80;
 
     /// Opens MPR121 with default I2C address (see `MPR121_I2CADDR_DEFAULT`)
@@ -148,7 +147,7 @@ impl Mpr121TouchStatus {
 
     /// Returns if specific pin was touched
     pub fn touched(&self, item: u8) -> bool {
-        if item <= 11 {
+        if item <= Mpr121TouchStatus::last() {
             return self.status >> item & 0x1 != 0;
         }
 
