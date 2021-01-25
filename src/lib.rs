@@ -1,14 +1,30 @@
+//! Rust version of access to adafruit MPR121 capacitive touch sensor HAT under Linux.
+//! Completely inspired by
+//! [this](https://github.com/adafruit/Adafruit_CircuitPython_MPR121)
+//! and [that](https://github.com/adafruit/Adafruit_MPR121) original adafruit repos.
+//! It only works with 12 input touch, numbered from 0 to 11 [product info](https://www.adafruit.com/product/2340).
+//!
+//! Default initialization:
+//! ```rust,no_run
+//! use adafruit_mpr121::Mpr121;
+//! let mut touch_sensor = Mpr121::new_default(1).expect("Failed to initialize sensor");
+//! let status = touch_sensor.touch_status().unwrap();
+//! println!("Touch status: {}", status);
+
 use i2cdev::{
     core::*,
     linux::{LinuxI2CDevice, LinuxI2CError},
 };
 
+/// Manages adafruit MPR121 capacitive sensor HAT I2C device.
 pub struct Mpr121 {
     dev: LinuxI2CDevice,
 }
 
+/// Basic error type, mostly I2C errors
 pub type Mpr121Error = LinuxI2CError;
 
+/// Touch status for all pins
 #[derive(Debug)]
 pub struct Mpr121TouchStatus {
     status: u16,
@@ -20,12 +36,15 @@ pub struct Mpr121TouchStatusIterator<'a> {
     count: u8,
 }
 
+/// Default I2C address for MPR121
 pub const MPR121_I2CADDR_DEFAULT: u16 = 0x5A;
+
+/// Default touch threshold set for MPR121
 pub const MPR121_TOUCH_THRESHOLD_DEFAULT: u8 = 12;
+
+/// Default release threshold set for MPR121
 pub const MPR121_RELEASE_THRESHOLD_DEFAULT: u8 = 6;
 
-/// How MPR121 works is inspired by
-/// https://github.com/adafruit/Adafruit_CircuitPython_MPR121 and https://github.com/adafruit/Adafruit_MPR121
 impl Mpr121 {
     // Register addresses.
     const REG_TOUCHSTATUS_L: u8 = 0x00;
