@@ -3,6 +3,12 @@ name = "adafruit-mpr121"
 version = "0.1.0"
 authors = ["Piotr Zaczkowski <pzaczkowski@protonmail.com>"]
 edition = "2018"
+license = "MIT"
+description = "Allows access and reading touch status from Adafruit MPR121"
+documentation = "https://docs.rs/adafruit-mpr121/"
+repository = "https://github.com/zaczkows/adafruit-mpr121"
+readme = "README.md"
+keywords = [ "adafruit", "mpr121" ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
