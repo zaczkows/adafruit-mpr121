@@ -158,7 +158,7 @@ impl Mpr121 {
 
 impl Mpr121TouchStatus {
     /// Creates new touch status
-    fn new(touch_status: u16) -> Self {
+    pub fn new(touch_status: u16) -> Self {
         Self {
             status: touch_status,
         }
